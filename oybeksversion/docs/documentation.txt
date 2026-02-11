@@ -1,0 +1,56 @@
+RA Assignment — Friday Sermon Corpus (Jordan, 2025)
+
+Country chosen: Jordan
+Issuing authority: Ministry of Awqaf and Islamic Affairs and Holy Places (Jordan) / وزارة الأوقاف والشؤون والمقدسات الإسلامية - الأردن
+
+Why Jordan (and how I got here):
+Before committing to one country, I did a quick screening of several Muslim-majority countries that *might* meet the project constraints (standardized nationwide sermon + official online publication + at least a full year available). My goal was to find a source that is:
+(1) official, (2) stable over time, (3) easy to scrape reproducibly, and (4) already “PDF-native” (so I don’t need to convert HTML to PDF (I am not lazy though)).
+
+A few examples from the screening phase (and what was missing):
+- Malaysia (JAKIM e-Khutbah): sermons are often published as web pages (HTML) rather than weekly PDFs. This is great for reading, but it adds extra steps (HTML parsing and/or HTML→PDF conversion) and increases formatting variability.
+- Morocco (Habous): sermons are accessible online, but commonly as page content rather than a clean “one sermon = one PDF file” archive; it’s doable, but less aligned with the deliverable requirement of a PDF per sermon.
+- UAE (Awqaf): an official archive exists and PDFs are available, but the workflow tends to be more dynamic (year selectors / detail pages / non-date filenames), meaning the scraper must traverse more layers to reliably recover date + title for every entry.
+- Oman (MRA): PDFs/Word versions are available weekly, but calendar formats and labeling can vary (e.g., Hijri-first presentation). That’s solvable, but requires extra conversion/verification steps to ensure correct Gregorian YYYY-MM-DD labeling.
+
+Why Jordan won in the end :)
+- Jordan’s archive provides direct PDF links on an official government domain.
+- PDF filenames include an explicit Gregorian date pattern (d-m-yyyy.pdf), which makes it unusually scrape-friendly and reduces risk of mislabeling.
+- The dataset is naturally “weekly,” and the archive supports collecting a full year with minimal special-case logic.
+- In short: it’s the cleanest path to a reliable, reproducible 52+ sermon corpus with strong traceability ;) 
+
+Source page:
+- https://awqaf.gov.jo/AR/Pages/%D8%AE%D8%B7%D8%A8_%D8%A7%D9%84%D8%AC%D9%85%D8%B9%D8%A9?View=5333
+
+What was collected:
+- All sermon PDFs on the source page whose filenames end with *-*-2025.pdf
+- Each output file is a PDF named: YYYY-MM-DD - <Title>.pdf
+- A metadata cover page is prepended to each PDF containing: source URL, country, authority, date, title, retrieval time.
+- A manifest.csv is generated (including sha256 hashes) for verification and reproducibility.
+
+Challenges & solutions (what broke, and how I fixed it):
+1) Titles are not consistently listed on the archive page.
+   - Solution: extract the title programmatically from page 1 of each PDF (fallback to filename if needed).
+
+2) Duplicate links or repeated entries can appear on listing-style pages.
+   - Solution: deduplicate by sermon date and sort chronologically to ensure a clean weekly sequence.
+
+3) Arabic text on a generated cover page can render as “black squares” (font/RTL issue).
+   - Solution: register an Arabic TTF font (e.g., Amiri) and apply Arabic reshaping + bidi display so Arabic titles/authority render correctly.
+
+4) Filenames can break on different operating systems (slashes, colons, very long titles).
+   - Solution: sanitize titles to remove forbidden characters and trim length while keeping the filename meaningful.
+
+5) Reproducibility + respectful scraping behavior :)
+   - Solution: use a single requests session with clear headers and an optional delay; keep everything parameterized (year/output folder); log outputs via manifest + hashes.
+
+How to reproduce:
+- Python 3.10+ (tested locally)
+- Install requirements: pip install -r requirements.txt
+- Run: python scrape_jordan_khutbah.py --year 2025 --out Humoyunversion
+
+Outputs:
+- original_pdfs/: raw downloaded PDFs (unchanged)
+- pdfs/: final submission-ready PDFs (metadata cover page + original pages)
+- manifest.csv: metadata + sha256 hashes
+- docs/documentation.txt: this file

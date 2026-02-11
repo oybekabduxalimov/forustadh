@@ -1,0 +1,8 @@
+requests>=2.31.0
+beautifulsoup4>=4.12.2
+lxml>=5.1.0
+pdfplumber>=0.11.0
+pypdf>=4.0.0
+reportlab>=4.0.9
+arabic-reshaper>=3.0.0
+python-bidi>=0.6.0
