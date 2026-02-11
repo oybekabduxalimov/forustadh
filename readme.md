@@ -29,7 +29,7 @@ After running, you will get an output directory like `Humoyunsversion` containin
 
 ## Requirements
 
-* **Python:** 3.10+ (recommended)
+* Please use **Python:** 3.10+ 
 * Packages are listed in `requirements.txt`
 
 > Note: For Arabic text to render correctly on the metadata cover page (no black squares), the script uses:
